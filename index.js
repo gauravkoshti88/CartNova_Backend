@@ -10,6 +10,7 @@ import adminRouter from "./routes/admin/admin.routes.js";
 import categoryRouter from "./routes/admin/category.routes.js";
 import subCategoryRouter from "./routes/admin/subCategory.routes.js";
 import brandRouter from "./routes/admin/brand.routes.js";
+import productRouter from "./routes/admin/product.routes.js";
 dotenv.config()
 
 const app = express()
@@ -31,7 +32,7 @@ app.get("/", (req, res) => {
 })
 
 // admin routes
-app.use("/api/admin-auth", adminAuthRouter);
+app.use("/api/auth/admin", adminAuthRouter);
 app.use("/api/admin", adminRouter);
 
 // admin category routes
@@ -42,6 +43,9 @@ app.use("/api/admin", subCategoryRouter);
 
 // admin productBrand routes
 app.use("/api/admin", brandRouter);
+
+// admin product routes
+app.use("/api/admin", productRouter);
 
 // user routes
 app.use("/api/auth", authRouter);
