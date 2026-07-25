@@ -6,44 +6,34 @@ import { deleteFromCloudinary, updateCloudinaryImage, uploadToCloudinary } from 
 
 export const addNewBrand = async (req, res) => {
     try {
-        const { category, subCategory, name, description } = req.body;
+        let { categories, name, description } = req.body;
 
-        if (!category || !subCategory || !name || !description) {
+        if (!Array.isArray(categories)) {
+            categories = [categories];
+        }
+
+        if (!categories || !name || !description) {
             return res.status(400).json({
                 success: false,
                 message: 'Required all fields'
             })
         }
 
-        const categoryExist = await Category.findById(category);
+        const categoryExist = await Category.find({ _id: { $in: categories } });
 
-        if (!categoryExist) {
+        if (!categoryExist || categoryExist.length !== categories.length) {
             return res.status(404).json({
                 success: false,
-                message: "Category not found"
-            })
+                message: "One or more categories not found"
+            });
         }
 
-        const subCategoryExist = await SubCategory.findById(subCategory);
-
-        if (!subCategoryExist) {
-            return res.status(404).json({
-                success: false,
-                message: "Sub-Category not found"
-            })
-        }
-
-        const productBrand = await ProductBrand.findOne({
-            category,
-            subCategory,
-            name: name.trim()
-        });
-
+        const productBrand = await ProductBrand.findOne({ name: name.trim() });
         if (productBrand) {
             return res.status(400).json({
                 success: false,
-                message: `${productBrand.name} Product Brand is already exists`
-            })
+                message: `${productBrand.name} Product Brand already exists`
+            });
         }
 
         let image = {
@@ -61,8 +51,7 @@ export const addNewBrand = async (req, res) => {
         }
 
         const newBrand = await ProductBrand.create({
-            category,
-            subCategory,
+            categories,
             name: name.trim(),
             description,
             image
@@ -74,6 +63,8 @@ export const addNewBrand = async (req, res) => {
             newBrand
         })
     } catch (error) {
+        console.log(error);
+
         return res.status(500).json({
             success: false,
             error: `Add brand error ${error}`
@@ -81,58 +72,80 @@ export const addNewBrand = async (req, res) => {
     }
 }
 
-export const getBrandByCategoryAndSubCategory = async (req, res) => {
+export const getAllBrand = async (req, res) => {
+
     try {
-        const { categoryId, subCategoryId } = req.params;
+        const brands = await ProductBrand.find().sort({ createdAt: -1 }).populate("categories", "name");
 
-        if (!mongoose.Types.ObjectId.isValid(categoryId) || !mongoose.Types.ObjectId.isValid(subCategoryId)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invaild category and subcategory id'
-            })
-        };
-
-        const category = await Category.findById(categoryId);
-
-        if (!category) {
+        if (!brands || brands.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Category not found'
-            })
-        }
-
-        const subCategory = await SubCategory.findById(subCategoryId);
-
-        if (!subCategory) {
-            return res.status(404).json({
-                success: false,
-                message: 'Sub-Category not found'
-            })
-        }
-
-        const brands = await ProductBrand.find({ category: categoryId, subCategory: subCategoryId }).populate("category subCategory");
-
-        if (!brands) {
-            return res.status(404).json({
-                success: false,
-                message: 'Product Brand not found'
-            })
+                message: "No Product Brands found",
+            });
         }
 
         return res.status(200).json({
             success: true,
-            message: `Get brands by category ${category.name} & subCategory ${subCategory.name}`,
+            message: "All Product Brands",
             count: brands.length,
-            brands
-        })
+            brands,
+        });
 
     } catch (error) {
+        console.error("Error in getAllBrand:", error);
+
         return res.status(500).json({
             success: false,
-            error: `Add brand error ${error}`
-        })
+            message: "Error fetching brands",
+            error: error.message,
+        });
     }
-}
+};
+
+export const getBrandByCategory = async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid category id 122"
+            });
+        }
+
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: "Category not found"
+            });
+        }
+
+        const brands = await ProductBrand.find({ categories: categoryId }).sort({ createdAt: -1 }).populate("categories", "name");
+
+        if (!brands || brands.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No Product Brands found for this category"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `Brands under category ${category.name}`,
+            count: brands.length,
+            brands
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            error: `Get brand error ${error}`
+        });
+    }
+};
 
 export const getBrandById = async (req, res) => {
     try {
@@ -145,7 +158,7 @@ export const getBrandById = async (req, res) => {
             })
         };
 
-        const productBrand = await ProductBrand.findById(brandId).populate("category subCategory");
+        const productBrand = await ProductBrand.findById(brandId).sort({ createdAt: -1 }).populate("categories", "name");
 
         if (!productBrand) {
             return res.status(404).json({
@@ -180,7 +193,7 @@ export const updateBrandById = async (req, res) => {
             })
         };
 
-        const productBrand = await ProductBrand.findById(brandId).populate("category subCategory");
+        const productBrand = await ProductBrand.findById(brandId).sort({ createdAt: -1 }).populate("categories", "name");
 
         if (!productBrand) {
             return res.status(404).json({
@@ -245,7 +258,7 @@ export const updateBrandStatusById = async (req, res) => {
             })
         };
 
-        const brand = await ProductBrand.findById(brandId).populate("category subCategory");
+        const brand = await ProductBrand.findById(brandId).sort({ createdAt: -1 }).populate("categories", "name");
 
         if (!brand) {
             return res.status(404).json({

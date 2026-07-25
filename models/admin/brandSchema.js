@@ -1,16 +1,13 @@
 import mongoose from "mongoose";
 
 const brandSchema = new mongoose.Schema({
-    category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
-        required: true
-    },
-    subCategory: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "SubCategory",
-        required: true
-    },
+    categories: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Category",
+            required: true
+        }
+    ],
     name: {
         type: String,
         required: true,
@@ -36,7 +33,7 @@ const brandSchema = new mongoose.Schema({
         enum: ["active", "inactive"],
         default: "active"
     }
-},{timestamps:true});
+}, { timestamps: true });
 
 const ProductBrand = mongoose.model("ProductBrand", brandSchema);
 

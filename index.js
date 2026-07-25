@@ -35,14 +35,14 @@ app.get("/", (req, res) => {
 app.use("/api/auth/admin", adminAuthRouter);
 app.use("/api/admin", adminRouter);
 
-// admin category routes
-app.use("/api/admin", categoryRouter);
+// admin productBrand routes
+app.use("/api/admin", brandRouter);
 
 // admin sub-category routes
 app.use("/api/admin", subCategoryRouter);
 
-// admin productBrand routes
-app.use("/api/admin", brandRouter);
+// admin category routes
+app.use("/api/admin", categoryRouter);
 
 // admin product routes
 app.use("/api/admin", productRouter);

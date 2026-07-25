@@ -69,6 +69,34 @@ export const addSubCategory = async (req, res) => {
     }
 }
 
+export const getAllSubCategory = async (req, res) => {
+    try {
+        const allSubCategory = await SubCategory.find().sort({ createdAt: -1 }).populate("category", "name");
+
+        if (!allSubCategory) {
+            return res.status(404).json({
+                success: false,
+                message: "No Sub-Category Found"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: `Get All Sub-category`,
+            count: allSubCategory.length,
+            allSubCategory
+        })
+
+    } catch (error) {
+        console.error("Error in getAllBrand:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching brands",
+            error: error.message,
+        });
+    }
+};
+
 export const getSubCategoryByCategory = async (req, res) => {
     try {
         const { categoryId } = req.params;
@@ -89,7 +117,7 @@ export const getSubCategoryByCategory = async (req, res) => {
             })
         }
 
-        const subCategory = await SubCategory.find({ category: categoryId }).sort({ createdAt: -1 }).populate("category")
+        const subCategory = await SubCategory.find({ category: categoryId }).sort({ createdAt: -1 }).populate("category", "name")
 
         return res.status(200).json({
             success: true,
@@ -98,6 +126,8 @@ export const getSubCategoryByCategory = async (req, res) => {
             subCategory
         })
     } catch (error) {
+        console.log(error);
+
         return res.status(500).json({
             success: false,
             error: `Get Sub-Category By Category Error ${error}`
@@ -116,7 +146,7 @@ export const getSubCategoryById = async (req, res) => {
             })
         }
 
-        const subCategory = await SubCategory.findById(id).populate("category");
+        const subCategory = await SubCategory.findById(id).populate("category", "name");
 
         if (!subCategory) {
             return res.status(404).json({
@@ -150,7 +180,7 @@ export const updateSubCategory = async (req, res) => {
             })
         }
 
-        const subCategory = await SubCategory.findById(id).populate("category");
+        const subCategory = await SubCategory.findById(id).populate("category", "name");
 
         if (!subCategory) {
             return res.status(404).json({
@@ -217,7 +247,7 @@ export const updateSubCategoryStatus = async (req, res) => {
             });
         }
 
-        const subCategory = await SubCategory.findById(id).populate("category");
+        const subCategory = await SubCategory.findById(id).populate("category", "name");
 
         if (!subCategory) {
             return res.status(404).json({
