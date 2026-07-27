@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import Category from "../../models/admin/categorySchema.js";
+import SubCategory from '../../models/admin/subCategorySchema.js'
+import Product from '../../models/admin/productSchema.js'
 import { deleteFromCloudinary, updateCloudinaryImage, uploadToCloudinary } from "../../utils/cloudinaryFunc.js";
 
 export const addCategory = async (req, res) => {
@@ -49,7 +51,7 @@ export const addCategory = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        
+
         return res.status(500).json({
             success: false,
             error: `Add Category Error ${error}`
@@ -59,7 +61,7 @@ export const addCategory = async (req, res) => {
 
 export const categoryList = async (req, res) => {
     try {
-        const categories = await Category.find().sort({ createdAt: -1 });
+        const categories = await Category.find({ isDelete: false }).sort({ createdAt: -1 });
 
         return res.status(200).json({
             success: true,
@@ -95,10 +97,16 @@ export const getSingleCategory = async (req, res) => {
             });
         }
 
+        const subCategory = await SubCategory.find({ category: category._id }).select("name -_id");
+
+        const productCount = await Product.countDocuments({ "basicInfo.category": category._id });
+
         return res.status(200).json({
             success: true,
             message: `Get ${category?.name} Category Successfully`,
-            category
+            category,
+            existSubCategory: subCategory,
+            productCount
         });
     } catch (error) {
         return res.status(500).json({
@@ -111,7 +119,7 @@ export const getSingleCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description } = req.body;
+        const { name, description, status } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
@@ -156,7 +164,7 @@ export const updateCategory = async (req, res) => {
 
         if (name) category.name = name.trim();
         if (description !== undefined) category.description = description;
-
+        if (status) category.status = status;
         await category.save();
 
         return res.status(200).json({
@@ -237,11 +245,8 @@ export const deleteCategory = async (req, res) => {
             })
         }
 
-        if (category.image.public_id) {
-            await deleteFromCloudinary(category.image.public_id);
-        }
-
-        await Category.findByIdAndDelete(id);
+        category.isDelete = true;
+        await category.save();
 
         return res.status(200).json({
             success: true,
@@ -251,6 +256,60 @@ export const deleteCategory = async (req, res) => {
         return res.status(500).json({
             success: false,
             error: `Delete Category Error ${error}`
+        })
+    }
+}
+
+export const undoCategory = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid Category Id'
+            });
+        }
+
+        const category = await Category.findById(id);
+
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: "Category not found"
+            })
+        }
+
+        category.isDelete = false;
+        await category.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Category Undo Successfully',
+            category
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: `Delete Category Error ${error}`
+        })
+    }
+}
+
+export const deletedCategoryList = async (req, res) => {
+    try {
+        const categories = await Category.find({ isDelete: true }).sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            message: "Get Deleted Categories List Successfully",
+            count: categories.length,
+            categories
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: `Deleted Category List Error ${error}`
         })
     }
 }

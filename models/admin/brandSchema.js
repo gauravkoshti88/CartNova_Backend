@@ -32,6 +32,10 @@ const brandSchema = new mongoose.Schema({
         type: String,
         enum: ["active", "inactive"],
         default: "active"
+    },
+    isDelete: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

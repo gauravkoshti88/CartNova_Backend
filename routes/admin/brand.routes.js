@@ -1,11 +1,13 @@
 import express from "express";
 import { adminAuth } from "../../middleware/Auth.js";
-import { addNewBrand, deleteBrandById, getAllBrand, getBrandByCategory, getBrandById, updateBrandById, updateBrandStatusById } from "../../controllers/admin/brand.controller.js";
+import { addNewBrand, deleteBrandById, getAllBrand, getAllDeletedBrand, getBrandByCategory, getBrandById, undoDeletedBrand, updateBrandById, updateBrandStatusById } from "../../controllers/admin/brand.controller.js";
 import upload from "../../middleware/multer.js";
 
 const brandRouter = express.Router();
 
 brandRouter.get("/category/get-all-brands", adminAuth, getAllBrand);
+
+brandRouter.get("/category/get-all-deleted-brand", adminAuth, getAllDeletedBrand);
 
 brandRouter.get("/category/get-brand/:categoryId", adminAuth, getBrandByCategory);
 
@@ -14,6 +16,8 @@ brandRouter.get("/category/brand/:brandId", adminAuth, getBrandById);
 brandRouter.post("/category/add-new-brand", adminAuth, upload.single("image"), addNewBrand);
 
 brandRouter.put("/category/update-brand/:brandId", adminAuth, upload.single("image"), updateBrandById);
+
+brandRouter.put("/category/undo-deleted-brand/:id", adminAuth, undoDeletedBrand)
 
 brandRouter.patch("/category/update-brand-status/:brandId", adminAuth, updateBrandStatusById);
 

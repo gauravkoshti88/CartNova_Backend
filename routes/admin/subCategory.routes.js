@@ -1,11 +1,13 @@
 import express from "express";
 import { adminAuth } from '../../middleware/Auth.js'
-import { addSubCategory, deleteSubCategory, getAllSubCategory, getSubCategoryByCategory, getSubCategoryById, updateSubCategory, updateSubCategoryStatus } from "../../controllers/admin/subCategory.controller.js";
+import { addSubCategory, deleteSubCategory, getAllDeletedSubCategory, getAllSubCategory, getSubCategoryByCategory, getSubCategoryById, undoSubCategory, updateSubCategory, updateSubCategoryStatus } from "../../controllers/admin/subCategory.controller.js";
 import upload from '../../middleware/multer.js'
 
 const subCategoryRouter = express.Router();
 
 subCategoryRouter.get("/category/get-all-sub-category", adminAuth, getAllSubCategory);
+
+subCategoryRouter.get("/category/get-all-deleted-sub-category", adminAuth, getAllDeletedSubCategory);
 
 subCategoryRouter.get("/category/get-sub-category/:categoryId", adminAuth, getSubCategoryByCategory);
 
@@ -14,6 +16,8 @@ subCategoryRouter.get("/category/sub-category/:id", adminAuth, getSubCategoryByI
 subCategoryRouter.post("/category/add-sub-category", adminAuth, upload.single("image"), addSubCategory);
 
 subCategoryRouter.put("/category/update-sub-category/:id", adminAuth, upload.single("image"), updateSubCategory);
+
+subCategoryRouter.put("/category/undo-deleted-sub-category/:id", adminAuth, undoSubCategory);
 
 subCategoryRouter.patch("/category/update-sub-category-status/:id", adminAuth, updateSubCategoryStatus);
 

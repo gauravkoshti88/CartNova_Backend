@@ -75,7 +75,7 @@ export const addNewBrand = async (req, res) => {
 export const getAllBrand = async (req, res) => {
 
     try {
-        const brands = await ProductBrand.find().sort({ createdAt: -1 }).populate("categories", "name");
+        const brands = await ProductBrand.find({ isDelete: false }).sort({ createdAt: -1 }).populate("categories", "name");
 
         if (!brands || brands.length === 0) {
             return res.status(404).json({
@@ -311,9 +311,8 @@ export const deleteBrandById = async (req, res) => {
             })
         }
 
-        await deleteFromCloudinary(brand.image.public_id);
-
-        await ProductBrand.findByIdAndDelete(brandId);
+        brand.isDelete = true;
+        await brand.save();
 
         return res.status(200).json({
             success: true,
@@ -326,3 +325,69 @@ export const deleteBrandById = async (req, res) => {
         })
     }
 }
+
+export const undoDeletedBrand = async (req, res) => {
+    try {
+        const { brandId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(brandId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid Brand Id'
+            })
+        }
+
+        const brand = await ProductBrand.findById(brandId);
+
+        if (!brand) {
+            return res.status(404).json({
+                success: false,
+                message: 'Brand not found'
+            })
+        }
+
+        brand.isDelete = false;
+        await brand.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Product Brand Undo Successfully ✅',
+            brand
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: `Undo Delete brand by Id error ${error}`
+        })
+    }
+}
+
+export const getAllDeletedBrand = async (req, res) => {
+
+    try {
+        const brands = await ProductBrand.find({ isDelete: true }).sort({ createdAt: -1 }).populate("categories", "name");
+
+        if (!brands || brands.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No Product Brands found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "All Deleted Product Brands",
+            count: brands.length,
+            brands,
+        });
+
+    } catch (error) {
+        console.error("Error in getAllBrand:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Error get all deleted brands",
+            error: error.message,
+        });
+    }
+};

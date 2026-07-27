@@ -2,6 +2,7 @@ import SubCategory from "../../models/admin/subCategorySchema.js";
 import Category from '../../models/admin/categorySchema.js'
 import { deleteFromCloudinary, updateCloudinaryImage, uploadToCloudinary } from "../../utils/cloudinaryFunc.js";
 import mongoose from "mongoose";
+import Product from "../../models/admin/productSchema.js";
 
 export const addSubCategory = async (req, res) => {
     try {
@@ -71,7 +72,7 @@ export const addSubCategory = async (req, res) => {
 
 export const getAllSubCategory = async (req, res) => {
     try {
-        const allSubCategory = await SubCategory.find().sort({ createdAt: -1 }).populate("category", "name");
+        const allSubCategory = await SubCategory.find({ isDelete: false }).sort({ createdAt: -1 }).populate("category", "name");
 
         if (!allSubCategory) {
             return res.status(404).json({
@@ -155,10 +156,15 @@ export const getSubCategoryById = async (req, res) => {
             })
         }
 
+        const productCount = await Product.countDocuments({
+            "basicInfo.subCategory": subCategory._id
+        });
+
         return res.status(200).json({
             success: true,
             message: `Get ${subCategory.name} Sub-Category`,
-            subCategory
+            subCategory,
+            productCount
         })
     } catch (error) {
         return res.status(500).json({
@@ -171,7 +177,7 @@ export const getSubCategoryById = async (req, res) => {
 export const updateSubCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description } = req.body;
+        const { name, description, status } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
@@ -216,6 +222,7 @@ export const updateSubCategory = async (req, res) => {
 
         if (name) subCategory.name = name.trim();
         if (description !== undefined) subCategory.description = description;
+        if (status) subCategory.status = status;
 
         await subCategory.save();
 
@@ -300,11 +307,8 @@ export const deleteSubCategory = async (req, res) => {
             })
         }
 
-        if (subCategory.image.public_id) {
-            await deleteFromCloudinary(subCategory.image.public_id);
-        }
-
-        await SubCategory.findByIdAndDelete(id);
+        subCategory.isDelete = true;
+        await subCategory.save();
 
         return res.status(200).json({
             success: true,
@@ -317,3 +321,67 @@ export const deleteSubCategory = async (req, res) => {
         })
     }
 }
+
+export const undoSubCategory = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid Sub-Category Id'
+            });
+        }
+
+        const subCategory = await SubCategory.findById(id);
+
+        if (!subCategory) {
+            return res.status(404).json({
+                success: false,
+                message: "Sub-Category not found"
+            })
+        }
+
+        subCategory.isDelete = false;
+        await subCategory.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Sub-Category Undo Successfully',
+            subCategory
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: `Delete Sub-Category Error ${error}`
+        })
+    }
+}
+
+export const getAllDeletedSubCategory = async (req, res) => {
+    try {
+        const allSubCategory = await SubCategory.find({ isDelete: true }).sort({ createdAt: -1 }).populate("category", "name");
+
+        if (!allSubCategory) {
+            return res.status(404).json({
+                success: false,
+                message: "No Sub-Category Found"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: `Get All Sub-category`,
+            count: allSubCategory.length,
+            allSubCategory
+        })
+
+    } catch (error) {
+        console.error("Error in getAllBrand:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching brands",
+            error: error.message,
+        });
+    }
+};

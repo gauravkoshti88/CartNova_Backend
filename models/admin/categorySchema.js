@@ -26,6 +26,10 @@ const categorySchema = new mongoose.Schema({
         enum:["active", "inactive"],
         default:"active"
     },
+    isDelete:{
+        type: Boolean,
+        default: false
+    }
 }, {timestamps:true});
 
 const Category = mongoose.model("Category", categorySchema);

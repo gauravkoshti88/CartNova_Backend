@@ -44,17 +44,62 @@ const mediaSchema = new mongoose.Schema(
 
 const attributeSchema = new mongoose.Schema(
     {
+        id: {
+            type: String,
+            default: "",
+        },
+
         name: {
             type: String,
             required: true,
             trim: true,
         },
 
+        displayType: {
+            type: String,
+            default: "button",
+        },
+
+        isPrimary: {
+            type: Boolean,
+            default: false,
+        },
+
         values: [
             {
-                type: String,
-                trim: true,
-            },
+                id: {
+                    type: String,
+                    default: "",
+                },
+
+                label: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
+
+                color: {
+                    type: String,
+                    default: "",
+                },
+
+                image: {
+                    preview: {
+                        type: String,
+                        default: "",
+                    },
+
+                    url: {
+                        type: String,
+                        default: "",
+                    },
+
+                    publicId: {
+                        type: String,
+                        default: "",
+                    }
+                }
+            }
         ],
     },
     { _id: false }
@@ -105,7 +150,7 @@ const variantSchema = new mongoose.Schema(
 
         attributes: {
             type: Map,
-            of: String,
+            of: Object,
             default: {},
         },
     },
@@ -133,7 +178,7 @@ const productSchema = new mongoose.Schema(
 
             brand: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "Brand",
+                ref: "ProductBrand",
                 default: null,
             },
 
@@ -339,7 +384,12 @@ const productSchema = new mongoose.Schema(
         publish: {
             status: {
                 type: String,
-                enum: ["draft", "active", "archived"],
+                enum: [
+                    "draft",
+                    "published",
+                    "scheduled",
+                    "archived"
+                ],
                 default: "draft",
             },
 
