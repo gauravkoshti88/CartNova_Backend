@@ -175,16 +175,19 @@ export const getAdminDashboard = async (req, res) => {
     const [
       totalRevenueResult,
       paidRevenueResult,
+      pendingRevenueResult,
       refundedRevenueResult,
       todayRevenueResult,
       monthRevenueResult,
       lastMonthRevenueResult,
     ] = await Promise.all([
+      // ================= TOTAL REVENUE =================
+      // Paid + Pending dono, cancelled orders ko exclude karke
       Order.aggregate([
         {
           $match: {
             paymentStatus: {
-              $in: ["paid"],
+              $in: ["paid", "pending"],
             },
             orderStatus: {
               $ne: "cancelled",
@@ -201,10 +204,15 @@ export const getAdminDashboard = async (req, res) => {
         },
       ]),
 
+      // ================= PAID REVENUE =================
+      // Sirf actually paid orders
       Order.aggregate([
         {
           $match: {
             paymentStatus: "paid",
+            orderStatus: {
+              $ne: "cancelled",
+            },
           },
         },
         {
@@ -217,6 +225,28 @@ export const getAdminDashboard = async (req, res) => {
         },
       ]),
 
+      // ================= PENDING REVENUE =================
+      // COD unpaid / payment pending orders
+      Order.aggregate([
+        {
+          $match: {
+            paymentStatus: "pending",
+            orderStatus: {
+              $ne: "cancelled",
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: "$totalAmount",
+            },
+          },
+        },
+      ]),
+
+      // ================= REFUNDED REVENUE =================
       Order.aggregate([
         {
           $match: {
@@ -235,6 +265,7 @@ export const getAdminDashboard = async (req, res) => {
         },
       ]),
 
+      // ================= TODAY =================
       Order.aggregate([
         {
           $match: {
@@ -242,6 +273,9 @@ export const getAdminDashboard = async (req, res) => {
               $gte: startOfToday,
             },
             paymentStatus: "paid",
+            orderStatus: {
+              $ne: "cancelled",
+            },
           },
         },
         {
@@ -254,6 +288,7 @@ export const getAdminDashboard = async (req, res) => {
         },
       ]),
 
+      // ================= THIS MONTH =================
       Order.aggregate([
         {
           $match: {
@@ -261,6 +296,9 @@ export const getAdminDashboard = async (req, res) => {
               $gte: startOfMonth,
             },
             paymentStatus: "paid",
+            orderStatus: {
+              $ne: "cancelled",
+            },
           },
         },
         {
@@ -273,6 +311,7 @@ export const getAdminDashboard = async (req, res) => {
         },
       ]),
 
+      // ================= LAST MONTH =================
       Order.aggregate([
         {
           $match: {
@@ -281,6 +320,9 @@ export const getAdminDashboard = async (req, res) => {
               $lte: endOfLastMonth,
             },
             paymentStatus: "paid",
+            orderStatus: {
+              $ne: "cancelled",
+            },
           },
         },
         {
@@ -296,10 +338,19 @@ export const getAdminDashboard = async (req, res) => {
 
     const revenue = {
       total: totalRevenueResult[0]?.total || 0,
+
+      // Actually received money
       paid: paidRevenueResult[0]?.total || 0,
+
+      // COD / other unpaid orders
+      pending: pendingRevenueResult[0]?.total || 0,
+
       refunded: refundedRevenueResult[0]?.total || 0,
+
       today: todayRevenueResult[0]?.total || 0,
+
       thisMonth: monthRevenueResult[0]?.total || 0,
+
       lastMonth: lastMonthRevenueResult[0]?.total || 0,
     };
 
