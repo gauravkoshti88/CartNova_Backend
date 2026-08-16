@@ -21,6 +21,7 @@ import orderRouter from "./routes/orderRoutes.js";
 import adminOrderRouter from "./routes/admin/adminOrderRoutes.js";
 import paymentRouter from "./routes/paymentRoutes.js";
 import wishlistRouter from "./routes/user/wishlistRouter.js";
+import customerRouter from "./routes/admin/customer.routes.js";
 dotenv.config();
 
 const app = express();
@@ -72,6 +73,9 @@ app.use("/api/admin", productRouter);
 
 // admin orders routes
 app.use("/api/admin/orders", adminOrderRouter);
+
+// admin customer routes
+app.use("/api/admin", customerRouter);
 
 // auth routes
 app.use("/api/auth", authRouter);

@@ -1,4 +1,4 @@
-import bycrpt from "bcrypt";
+import bcrypt from "bcrypt";
 import { adminToken, genrateToken } from "../../config/token.js";
 import Admin from "../../models/admin/adminSchema.js";
 
@@ -22,7 +22,7 @@ export const adminLogin = async (req, res) => {
       });
     }
 
-    const comparePassword = await bycrpt.compare(password, admin.password);
+    const comparePassword = await bcrypt.compare(password, admin.password);
 
     if (!comparePassword) {
       return res.status(400).json({
