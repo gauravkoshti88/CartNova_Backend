@@ -2,94 +2,142 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import dns from "dns";
+
 import dbConnect from "./config/db.js";
+
+// Routes
 import authRouter from "./routes/user/auth.routes.js";
 import userRouter from "./routes/user/user.routes.js";
+
 import adminAuthRouter from "./routes/admin/admin.auth.routes.js";
 import adminRouter from "./routes/admin/admin.routes.js";
 import categoryRouter from "./routes/admin/category.routes.js";
 import subCategoryRouter from "./routes/admin/subCategory.routes.js";
 import brandRouter from "./routes/admin/brand.routes.js";
 import productRouter from "./routes/admin/product.routes.js";
+import childCategoryRouter from "./routes/admin/childCategory.routes.js";
+
 import websiteRouter from "./routes/website.routes.js";
 import publicRouter from "./routes/public/public.routes.js";
-import childCategoryRouter from "./routes/admin/childCategory.routes.js";
-import dns from "dns";
 import publicCategoryRouter from "./routes/public/category.routes.js";
+
 import cartRouter from "./routes/user/cartRouter.js";
+import wishlistRouter from "./routes/user/wishlistRouter.js";
+
 import orderRouter from "./routes/orderRoutes.js";
 import adminOrderRouter from "./routes/admin/adminOrderRoutes.js";
 import paymentRouter from "./routes/paymentRoutes.js";
-import wishlistRouter from "./routes/user/wishlistRouter.js";
+
 import customerRouter from "./routes/admin/customer.routes.js";
+
+import chatRouter from "./routes/chatRoutes.js";
+
+// Socket
+import { initializeChatSocket } from "./socket/chatSocket.js";
+
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 5000;
+
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
+
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: "http://localhost:5173",
     credentials: true,
   }),
 );
+
 app.use(express.urlencoded({ extended: true }));
 
-// website routes
+// Website routes
 app.use("/api/website", websiteRouter);
 
-// public routes
+// Public routes
 app.use("/api/public", publicRouter);
 
-// public category routes
+// Public category routes
 app.use("/api/public/categories", publicCategoryRouter);
 
+// Wishlist routes
 app.use("/api/wishlist", wishlistRouter);
 
-// cart routes
+// Cart routes
 app.use("/api/user/cart", cartRouter);
 
-// admin routes
+// Admin auth routes
 app.use("/api/auth/admin", adminAuthRouter);
+
+// Admin routes
 app.use("/api/admin", adminRouter);
 
-// admin productBrand routes
+// Admin brand routes
 app.use("/api/admin", brandRouter);
 
-// admin sub-category routes
+// Admin sub-category routes
 app.use("/api/admin", subCategoryRouter);
 
-// admin child-category routes
+// Admin child-category routes
 app.use("/api/admin/child-category", childCategoryRouter);
 
-// admin category routes
+// Admin category routes
 app.use("/api/admin", categoryRouter);
 
-// admin product routes
+// Admin product routes
 app.use("/api/admin", productRouter);
 
-// admin orders routes
+// Admin order routes
 app.use("/api/admin/orders", adminOrderRouter);
 
-// admin customer routes
+// Admin customer routes
 app.use("/api/admin", customerRouter);
 
-// auth routes
+// User auth routes
 app.use("/api/auth", authRouter);
 
-// user routes
+// User routes
 app.use("/api/user", userRouter);
 
-// order routes
+// Order routes
 app.use("/api/order", orderRouter);
 
-// payment routes
+// Payment routes
 app.use("/api/payment", paymentRouter);
 
-app.listen(port, () => {
-  dbConnect();
-  console.log(`Server is running at http://localhost:${port}`);
+// Chat routes
+app.use("/api/chat", chatRouter);
+
+// Create HTTP server
+const httpServer = createServer(app);
+
+// Create Socket.IO server
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,
+  },
+});
+
+// Initialize chat socket
+initializeChatSocket(io);
+
+// Start server
+httpServer.listen(port, async () => {
+  try {
+    await dbConnect();
+
+    console.log(`Server is running at http://localhost:${port}`);
+
+    console.log("Socket.IO server is running");
+  } catch (error) {
+    console.error("Database connection failed:", error);
+  }
 });

@@ -227,6 +227,10 @@ const getAdminOrderById = async (orderId) => {
 
   const order = await Order.findById(orderId)
     .populate("user", "firstName lastName email phone")
+    .populate({
+      path: "items.product",
+      select: "name media",
+    })
     .lean();
 
   if (!order) {

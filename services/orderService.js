@@ -371,6 +371,10 @@ const getMyOrders = async (userId, { page = 1, limit = 10 } = {}) => {
 
   const [orders, totalOrders] = await Promise.all([
     Order.find(filter)
+      .populate({
+        path: "items.product",
+        select: "name media",
+      })
       .sort({
         createdAt: -1,
       })

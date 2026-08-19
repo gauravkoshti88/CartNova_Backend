@@ -55,11 +55,6 @@ const addressSchema = new mongoose.Schema(
       enum: ["home", "office", "other"],
       default: "home",
     },
-
-    isDefault: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     _id: true,
@@ -100,14 +95,21 @@ const userSchema = new mongoose.Schema(
     },
 
     profileImage: {
-      url: { type: String },
-      publicId: { type: String },
-      alt: { type: String, default: "profile" },
+      url: {
+        type: String,
+      },
+      publicId: {
+        type: String,
+      },
+      alt: {
+        type: String,
+        default: "profile",
+      },
     },
 
-    addresses: {
-      type: [addressSchema],
-      default: [],
+    address: {
+      type: addressSchema,
+      default: null,
     },
 
     isBlocked: {

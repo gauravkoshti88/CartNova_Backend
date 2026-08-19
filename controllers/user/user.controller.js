@@ -79,7 +79,7 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    const { firstName, lastName, email, phone, addresses } = req.body;
+    const { firstName, lastName, email, phone, address } = req.body;
 
     // ========================================================
     // BASIC FIELDS
@@ -102,32 +102,38 @@ export const updateProfile = async (req, res) => {
     }
 
     // ========================================================
-    // ADDRESSES
+    // SINGLE ADDRESS
     // ========================================================
 
-    if (addresses !== undefined) {
-      let parsedAddresses = addresses;
+    if (address !== undefined) {
+      let parsedAddress = address;
 
       // multipart/form-data me JSON string aayegi
-      if (typeof addresses === "string") {
+      if (typeof address === "string") {
         try {
-          parsedAddresses = JSON.parse(addresses);
+          parsedAddress = JSON.parse(address);
         } catch {
           return res.status(400).json({
             success: false,
-            message: "Invalid addresses format",
+            message: "Invalid address format",
           });
         }
       }
 
-      if (!Array.isArray(parsedAddresses)) {
-        return res.status(400).json({
-          success: false,
-          message: "Addresses must be an array",
-        });
-      }
+      // Address null/empty karna ho
+      if (parsedAddress === null) {
+        user.address = null;
+      } else {
+        // Address object hona chahiye
+        if (typeof parsedAddress !== "object" || Array.isArray(parsedAddress)) {
+          return res.status(400).json({
+            success: false,
+            message: "Address must be an object",
+          });
+        }
 
-      user.addresses = parsedAddresses;
+        user.address = parsedAddress;
+      }
     }
 
     // ========================================================
@@ -153,6 +159,10 @@ export const updateProfile = async (req, res) => {
       };
     }
 
+    // ========================================================
+    // SAVE
+    // ========================================================
+
     await user.save();
 
     const updatedUser = await User.findById(userId).select("-password");
@@ -165,7 +175,10 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     console.error("UPDATE PROFILE ERROR:", error);
 
-    // Duplicate email / phone
+    // ========================================================
+    // DUPLICATE EMAIL / PHONE
+    // ========================================================
+
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern || {})[0];
 
@@ -177,6 +190,21 @@ export const updateProfile = async (req, res) => {
             : field === "phone"
               ? "Phone number already exists"
               : "Email or phone already exists",
+      });
+    }
+
+    // ========================================================
+    // VALIDATION ERROR
+    // ========================================================
+
+    if (error.name === "ValidationError") {
+      const message = Object.values(error.errors)
+        .map((err) => err.message)
+        .join(", ");
+
+      return res.status(400).json({
+        success: false,
+        message,
       });
     }
 
