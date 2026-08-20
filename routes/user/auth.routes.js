@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  googleLogin,
   resetPassword,
   sendLoginOtp,
   sendResetPasswordOtp,
@@ -15,6 +16,8 @@ const authRouter = express.Router();
 authRouter.post("/user-register", userRegister);
 authRouter.post("/user-login", userLogin);
 authRouter.post("/user-logout", userLogout);
+
+authRouter.post("/google-login", googleLogin);
 
 // OTP LOGIN
 authRouter.post("/send-login-otp", sendLoginOtp);

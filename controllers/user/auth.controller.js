@@ -8,6 +8,140 @@ import LoginOtp from "../../models/user/loginOtpSchema.js";
 import PasswordResetOtp from "../../models/user/passwordResetOtpSchema.js";
 import { generateOtp, generateResetToken, hashOtp } from "../../utils/otp.js";
 
+import { OAuth2Client } from "google-auth-library";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: "Google credential is required.",
+      });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Google credential.",
+      });
+    }
+
+    const {
+      sub: googleId,
+      email,
+      email_verified,
+      given_name,
+      family_name,
+      picture,
+    } = payload;
+
+    if (!email || !email_verified) {
+      return res.status(401).json({
+        success: false,
+        message: "Google email could not be verified.",
+      });
+    }
+
+    let user = await User.findOne({
+      $or: [{ googleId }, { email: email.toLowerCase() }],
+    });
+
+    if (user?.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been blocked.",
+      });
+    }
+
+    if (user?.isDeleted) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been deleted.",
+      });
+    }
+
+    if (!user) {
+      user = await User.create({
+        firstName: given_name || "Google",
+        lastName: family_name || "User",
+        email: email.toLowerCase(),
+        phone: `google_${googleId}`,
+        googleId,
+        authProvider: "google",
+        profileImage: {
+          url: picture || "",
+          publicId: "",
+          alt: "profile",
+        },
+      });
+    } else {
+      let changed = false;
+
+      if (!user.googleId) {
+        user.googleId = googleId;
+        changed = true;
+      }
+
+      if (user.authProvider !== "google") {
+        user.authProvider = "google";
+        changed = true;
+      }
+
+      if (picture && user.profileImage?.url !== picture) {
+        user.profileImage = {
+          ...user.profileImage?.toObject?.(),
+          url: picture,
+          publicId: user.profileImage?.publicId || "",
+          alt: user.profileImage?.alt || "profile",
+        };
+
+        changed = true;
+      }
+
+      if (changed) {
+        await user.save();
+      }
+    }
+
+    const token = genrateToken(user._id);
+
+    res.cookie("userToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    const userObj = user.toObject();
+
+    delete userObj.password;
+
+    return res.status(200).json({
+      success: true,
+      message: "Google login successful.",
+      user: userObj,
+    });
+  } catch (error) {
+    console.error("GOOGLE LOGIN ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Google authentication failed.",
+    });
+  }
+};
+
 export const userRegister = async (req, res) => {
   try {
     const { firstName, lastName, email, password, phone } = req.body;
