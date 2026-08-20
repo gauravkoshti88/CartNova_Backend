@@ -360,7 +360,12 @@ export const getMyOrderById = async (userId, orderId) => {
   const order = await Order.findOne({
     _id: orderId,
     user: userId,
-  }).lean();
+  })
+    .populate({
+      path: "items.product",
+      select: "basicInfo variants media",
+    })
+    .lean();
 
   if (!order) {
     throw new Error("Order not found");
