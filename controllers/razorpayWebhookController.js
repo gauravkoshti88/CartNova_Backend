@@ -24,6 +24,8 @@ const verifyWebhookSignature = (rawBody, signature, secret) => {
 
 // Handle Razorpay webhook
 export const razorpayWebhookController = async (req, res) => {
+  console.log("🔥 RAZORPAY WEBHOOK HIT");
+  console.log("Webhook Headers:", req.headers);
   let webhookEvent = null;
 
   try {
