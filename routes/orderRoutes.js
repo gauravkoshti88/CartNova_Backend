@@ -1,6 +1,7 @@
 import express from "express";
 
 import { userAuth } from "../middleware/Auth.js";
+
 import {
   cancelMyOrderController,
   createOrderController,
@@ -10,15 +11,16 @@ import {
 
 const orderRouter = express.Router();
 
+// Create COD order
 orderRouter.post("/create", userAuth, createOrderController);
 
-// Get logged-in user's orders
+// Get user orders
 orderRouter.get("/my-orders", userAuth, getMyOrdersController);
 
-// Get logged-in user's single order
+// Get single order
 orderRouter.get("/:orderId", userAuth, getMyOrderByIdController);
 
-// Cancel logged-in user's order
+// Cancel order
 orderRouter.patch("/:orderId/cancel", userAuth, cancelMyOrderController);
 
 export default orderRouter;

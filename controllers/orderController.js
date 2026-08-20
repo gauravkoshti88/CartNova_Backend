@@ -5,21 +5,46 @@ import {
   cancelMyOrder,
 } from "../services/orderService.js";
 
-// --------------------------------------------------
-// Create Order
-// --------------------------------------------------
-
+// Create COD order
 export const createOrderController = async (req, res) => {
   try {
     const userId = req.userId;
 
-    const { shippingAddress, paymentMethod, payment = {} } = req.body;
+    const { shippingAddress, paymentMethod, idempotencyKey } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    if (!shippingAddress) {
+      return res.status(400).json({
+        success: false,
+        message: "Shipping address is required",
+      });
+    }
+
+    if (paymentMethod !== "cod") {
+      return res.status(400).json({
+        success: false,
+        message: "Only COD orders can be created through this endpoint",
+      });
+    }
+
+    if (!idempotencyKey) {
+      return res.status(400).json({
+        success: false,
+        message: "Idempotency key is required",
+      });
+    }
 
     const order = await createOrder({
       userId,
       shippingAddress,
-      paymentMethod,
-      payment,
+      paymentMethod: "cod",
+      idempotencyKey,
     });
 
     return res.status(201).json({
@@ -28,22 +53,33 @@ export const createOrderController = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("CREATE ORDER ERROR:", error);
+    console.error("CREATE COD ORDER ERROR:", error);
+
+    if (error?.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Duplicate order request",
+      });
+    }
 
     return res.status(400).json({
       success: false,
-      message: error.message || "Failed to create order",
+      message: error.message || "Failed to create COD order",
     });
   }
 };
 
-// --------------------------------------------------
-// Get My Orders
-// --------------------------------------------------
-
+// Get logged-in user's orders
 export const getMyOrdersController = async (req, res) => {
   try {
     const userId = req.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
 
     const { page = 1, limit = 10 } = req.query;
 
@@ -66,15 +102,25 @@ export const getMyOrdersController = async (req, res) => {
   }
 };
 
-// --------------------------------------------------
-// Get My Order By ID
-// --------------------------------------------------
-
+// Get logged-in user's order
 export const getMyOrderByIdController = async (req, res) => {
   try {
     const userId = req.userId;
-
     const { orderId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
 
     const order = await getMyOrderById(userId, orderId);
 
@@ -83,7 +129,7 @@ export const getMyOrderByIdController = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("GET MY ORDER BY ID ERROR:", error);
+    console.error("GET MY ORDER ERROR:", error);
 
     return res.status(404).json({
       success: false,
@@ -92,17 +138,26 @@ export const getMyOrderByIdController = async (req, res) => {
   }
 };
 
-// --------------------------------------------------
-// Cancel My Order
-// --------------------------------------------------
-
+// Cancel logged-in user's order
 export const cancelMyOrderController = async (req, res) => {
   try {
     const userId = req.userId;
-
     const { orderId } = req.params;
-
     const { reason = "" } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
 
     const order = await cancelMyOrder(userId, orderId, reason);
 
