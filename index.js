@@ -8,7 +8,6 @@ import dns from "dns";
 
 import dbConnect from "./config/db.js";
 
-// Routes
 import authRouter from "./routes/user/auth.routes.js";
 import userRouter from "./routes/user/user.routes.js";
 
@@ -35,8 +34,8 @@ import customerRouter from "./routes/admin/customer.routes.js";
 
 import chatRouter from "./routes/chatRoutes.js";
 
-// Socket
 import { initializeChatSocket } from "./socket/chatSocket.js";
+import razorpayWebhookRouter from "./routes/razorpayWebhookRoutes.js";
 
 dotenv.config();
 
@@ -45,16 +44,26 @@ const port = process.env.PORT || 5000;
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
-// Middleware
-app.use(express.json());
-app.use(cookieParser());
-
 app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
   }),
 );
+
+app.use(cookieParser());
+
+// Razorpay webhook raw body
+app.use(
+  "/api/webhooks/razorpay",
+  express.raw({
+    type: "application/json",
+  }),
+  razorpayWebhookRouter,
+);
+
+// Normal JSON body
+app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -115,10 +124,8 @@ app.use("/api/payment", paymentRouter);
 // Chat routes
 app.use("/api/chat", chatRouter);
 
-// Create HTTP server
 const httpServer = createServer(app);
 
-// Create Socket.IO server
 const io = new Server(httpServer, {
   cors: {
     origin: "http://localhost:5173",
@@ -126,16 +133,13 @@ const io = new Server(httpServer, {
   },
 });
 
-// Initialize chat socket
 initializeChatSocket(io);
 
-// Start server
 httpServer.listen(port, async () => {
   try {
     await dbConnect();
 
     console.log(`Server is running at http://localhost:${port}`);
-
     console.log("Socket.IO server is running");
   } catch (error) {
     console.error("Database connection failed:", error);

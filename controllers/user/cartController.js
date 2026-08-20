@@ -3,11 +3,7 @@ import Product from "../../models/productSchema.js";
 
 import { findProductVariant } from "../../utils/findProductVariant.js";
 
-/*
-|--------------------------------------------------------------------------
-| CART POPULATE
-|--------------------------------------------------------------------------
-*/
+// CART POPULATE
 
 const populateCart = async (cart) => {
   await cart.populate({
@@ -37,11 +33,7 @@ const populateCart = async (cart) => {
   return cart;
 };
 
-/*
-|--------------------------------------------------------------------------
-| GET CART
-|--------------------------------------------------------------------------
-*/
+// GET CART
 
 export const getCart = async (req, res) => {
   try {
@@ -100,9 +92,9 @@ export const addToCart = async (req, res) => {
 
     const requestedQuantity = Number(quantity);
 
-    // --------------------------------------------------
+    // ==========================================================
     // BASIC VALIDATION
-    // --------------------------------------------------
+    // ==========================================================
 
     if (!productId) {
       return res.status(400).json({
@@ -125,9 +117,9 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // FIND PRODUCT
-    // --------------------------------------------------
+    // ==========================================================
 
     const product = await Product.findById(productId);
 
@@ -138,9 +130,9 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // PRODUCT AVAILABILITY
-    // --------------------------------------------------
+    // ==========================================================
 
     if (product.publish?.status !== "published") {
       return res.status(400).json({
@@ -149,9 +141,9 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // FIND VARIANT
-    // --------------------------------------------------
+    // ==========================================================
 
     const variant = findProductVariant(product, variantId);
 
@@ -162,28 +154,45 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
-    // STOCK
-    // --------------------------------------------------
+    // ==========================================================
+    // INVENTORY SETTINGS
+    // ==========================================================
 
     const trackInventory = product.inventory?.trackInventory !== false;
 
     const allowBackorder = product.inventory?.allowBackorder === true;
 
-    if (
-      trackInventory &&
-      !allowBackorder &&
-      variant.stock < requestedQuantity
-    ) {
+    const maxOrderQty = Number(product.inventory?.maxOrderQty || 10);
+
+    // ==========================================================
+    // MAX ORDER QUANTITY - INITIAL REQUEST
+    // ==========================================================
+
+    if (requestedQuantity > maxOrderQty) {
       return res.status(400).json({
         success: false,
-        message: `Only ${variant.stock} items available`,
+        message: `You can add a maximum of ${maxOrderQty} items of this product.`,
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
+    // STOCK CHECK - INITIAL REQUEST
+    // ==========================================================
+
+    if (
+      trackInventory &&
+      !allowBackorder &&
+      requestedQuantity > variant.stock
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ${variant.stock} items available.`,
+      });
+    }
+
+    // ==========================================================
     // FIND / CREATE CART
-    // --------------------------------------------------
+    // ==========================================================
 
     let cart = await Cart.findOne({
       user: userId,
@@ -196,9 +205,9 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
-    // CHECK EXISTING ITEM
-    // --------------------------------------------------
+    // ==========================================================
+    // FIND EXISTING ITEM
+    // ==========================================================
 
     const existingItem = cart.items.find(
       (item) =>
@@ -206,26 +215,60 @@ export const addToCart = async (req, res) => {
         String(item.variantId) === String(variantId),
     );
 
-    // --------------------------------------------------
+    // ==========================================================
     // EXISTING ITEM
-    // --------------------------------------------------
+    // ==========================================================
 
     if (existingItem) {
-      const newQuantity = existingItem.quantity + requestedQuantity;
+      const newQuantity =
+        Number(existingItem.quantity || 0) + requestedQuantity;
+
+      // --------------------------------------------------------
+      // MAX ORDER QUANTITY
+      // --------------------------------------------------------
+
+      if (newQuantity > maxOrderQty) {
+        const remainingQuantity = Math.max(
+          maxOrderQty - Number(existingItem.quantity || 0),
+          0,
+        );
+
+        if (remainingQuantity === 0) {
+          return res.status(400).json({
+            success: false,
+            message: `You have already reached the maximum limit of ${maxOrderQty} items for this product.`,
+          });
+        }
+
+        return res.status(400).json({
+          success: false,
+          message: `You can add only ${remainingQuantity} more item${
+            remainingQuantity > 1 ? "s" : ""
+          }. Maximum limit is ${maxOrderQty}.`,
+        });
+      }
+
+      // --------------------------------------------------------
+      // STOCK CHECK
+      // --------------------------------------------------------
 
       if (trackInventory && !allowBackorder && newQuantity > variant.stock) {
         return res.status(400).json({
           success: false,
-          message: `Only ${variant.stock} items available`,
+          message: `Only ${variant.stock} items available.`,
         });
       }
+
+      // --------------------------------------------------------
+      // UPDATE EXISTING QUANTITY
+      // --------------------------------------------------------
 
       existingItem.quantity = newQuantity;
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // NEW ITEM
-    // --------------------------------------------------
+    // ==========================================================
     else {
       cart.items.push({
         product: productId,
@@ -234,17 +277,21 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
-    // SAVE
-    // --------------------------------------------------
+    // ==========================================================
+    // SAVE CART
+    // ==========================================================
 
     await cart.save();
 
-    // --------------------------------------------------
-    // POPULATE
-    // --------------------------------------------------
+    // ==========================================================
+    // POPULATE CART
+    // ==========================================================
 
     cart = await populateCart(cart);
+
+    // ==========================================================
+    // RESPONSE
+    // ==========================================================
 
     return res.status(200).json({
       success: true,
@@ -252,6 +299,8 @@ export const addToCart = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.error("ADD TO CART ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: "Failed to add product to cart",
@@ -440,9 +489,9 @@ export const updateCartItem = async (req, res) => {
 
     const quantity = Number(req.body.quantity);
 
-    // --------------------------------------------------
-    // VALIDATION
-    // --------------------------------------------------
+    // ==========================================================
+    // BASIC VALIDATION
+    // ==========================================================
 
     if (!Number.isInteger(quantity) || quantity < 1) {
       return res.status(400).json({
@@ -451,9 +500,9 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // FIND CART
-    // --------------------------------------------------
+    // ==========================================================
 
     let cart = await Cart.findOne({
       user: userId,
@@ -466,9 +515,9 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // FIND CART ITEM
-    // --------------------------------------------------
+    // ==========================================================
 
     const item = cart.items.id(itemId);
 
@@ -479,9 +528,9 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // FIND PRODUCT
-    // --------------------------------------------------
+    // ==========================================================
 
     const product = await Product.findById(item.product);
 
@@ -492,9 +541,9 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // PRODUCT AVAILABILITY
-    // --------------------------------------------------
+    // ==========================================================
 
     if (product.publish?.status !== "published") {
       return res.status(400).json({
@@ -503,9 +552,9 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
+    // ==========================================================
     // FIND VARIANT
-    // --------------------------------------------------
+    // ==========================================================
 
     const variant = findProductVariant(product, item.variantId);
 
@@ -516,34 +565,59 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    // --------------------------------------------------
-    // STOCK
-    // --------------------------------------------------
+    // ==========================================================
+    // INVENTORY SETTINGS
+    // ==========================================================
 
     const trackInventory = product.inventory?.trackInventory !== false;
 
     const allowBackorder = product.inventory?.allowBackorder === true;
 
-    if (trackInventory && !allowBackorder && quantity > variant.stock) {
+    const maxOrderQty = Number(product.inventory?.maxOrderQty || 10);
+
+    // ==========================================================
+    // MAX ORDER QUANTITY
+    // ==========================================================
+
+    if (quantity > maxOrderQty) {
       return res.status(400).json({
         success: false,
-        message: `Only ${variant.stock} items available`,
+        message: `You can add a maximum of ${maxOrderQty} items of this product.`,
       });
     }
 
-    // --------------------------------------------------
-    // UPDATE
-    // --------------------------------------------------
+    // ==========================================================
+    // STOCK CHECK
+    // ==========================================================
+
+    if (trackInventory && !allowBackorder && quantity > variant.stock) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ${variant.stock} items available.`,
+      });
+    }
+
+    // ==========================================================
+    // UPDATE QUANTITY
+    // ==========================================================
 
     item.quantity = quantity;
 
+    // ==========================================================
+    // SAVE CART
+    // ==========================================================
+
     await cart.save();
 
-    // --------------------------------------------------
-    // POPULATE
-    // --------------------------------------------------
+    // ==========================================================
+    // POPULATE CART
+    // ==========================================================
 
     cart = await populateCart(cart);
+
+    // ==========================================================
+    // RESPONSE
+    // ==========================================================
 
     return res.status(200).json({
       success: true,
@@ -551,6 +625,8 @@ export const updateCartItem = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.error("UPDATE CART ITEM ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: "Failed to update cart",
