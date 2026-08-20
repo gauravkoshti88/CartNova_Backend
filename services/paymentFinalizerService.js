@@ -142,6 +142,7 @@ export const finalizePayment = async ({
   paymentIntentId = null,
   razorpayOrderId,
   razorpayPaymentId,
+  fromWebhook = false,
 }) => {
   if (!razorpayOrderId) {
     throw new Error("Razorpay order ID is required");
@@ -196,6 +197,9 @@ export const finalizePayment = async ({
         paymentIntent.status = "paid";
         paymentIntent.razorpayPaymentId = razorpayPaymentId;
         paymentIntent.signatureVerified = true;
+        if (fromWebhook) {
+          paymentIntent.webhookVerified = true;
+        }
         paymentIntent.paymentCaptured = true;
         paymentIntent.paidAt = paymentIntent.paidAt || new Date();
         paymentIntent.order = existingOrder._id;
@@ -260,13 +264,6 @@ export const finalizePayment = async ({
     const intentSubtotalPaise = toPaise(intentSubtotal);
 
     const currentSubtotalPaise = toPaise(currentSubtotal);
-
-    console.log("========== CART PRICE CHECK ==========");
-    console.log("PaymentIntent subtotal:", intentSubtotal);
-    console.log("Current cart subtotal:", currentSubtotal);
-    console.log("PaymentIntent subtotal paise:", intentSubtotalPaise);
-    console.log("Current subtotal paise:", currentSubtotalPaise);
-    console.log("======================================");
 
     if (intentSubtotalPaise !== currentSubtotalPaise) {
       throw new Error(

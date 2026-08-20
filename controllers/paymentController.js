@@ -188,7 +188,6 @@ export const createPaymentIntentController = async (req, res) => {
     const userId = req.userId;
 
     const { shippingAddress, paymentMethod, idempotencyKey } = req.body;
-    console.log(" Create payment intent:", req.body);
 
     const paymentIntent = await createPaymentIntent({
       userId,
