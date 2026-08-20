@@ -164,11 +164,15 @@ export const razorpayWebhookController = async (req, res) => {
         );
       }
 
+      console.log("🔥 FINALIZING PAYMENT");
+
       const result = await finalizePayment({
         paymentIntentId: paymentIntent._id,
         razorpayOrderId: payment.order_id,
         razorpayPaymentId: payment.id,
       });
+
+      console.log("🔥 PAYMENT FINALIZED:", result);
 
       await WebhookEvent.updateOne(
         { eventId },
