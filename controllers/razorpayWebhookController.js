@@ -185,21 +185,6 @@ export const razorpayWebhookController = async (req, res) => {
         fromWebhook: true,
       });
 
-      console.log("🔥 PAYMENT FINALIZED:", result);
-
-      await PaymentIntent.updateOne(
-        {
-          _id: paymentIntent._id,
-        },
-        {
-          $set: {
-            webhookVerified: true,
-          },
-        },
-      );
-
-      console.log("✅ PAYMENT WEBHOOK VERIFIED");
-
       await WebhookEvent.updateOne(
         {
           eventId,
