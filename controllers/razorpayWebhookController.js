@@ -24,9 +24,6 @@ const verifyWebhookSignature = (rawBody, signature, secret) => {
 
 // Handle Razorpay webhook
 export const razorpayWebhookController = async (req, res) => {
-  console.log("🔥 RAZORPAY WEBHOOK HIT");
-  console.log("Webhook Headers:", req.headers);
-
   let webhookEvent = null;
 
   try {
@@ -78,8 +75,6 @@ export const razorpayWebhookController = async (req, res) => {
       });
     }
 
-    console.log("✅ RAZORPAY WEBHOOK SIGNATURE VERIFIED");
-
     let event;
 
     try {
@@ -98,16 +93,11 @@ export const razorpayWebhookController = async (req, res) => {
       });
     }
 
-    console.log("🔥 RAZORPAY EVENT:", event.event);
-    console.log("🔥 RAZORPAY EVENT ID:", eventId);
-
     const existingEvent = await WebhookEvent.findOne({
       eventId,
     });
 
     if (existingEvent?.status === "processed") {
-      console.log("⚠️ WEBHOOK ALREADY PROCESSED:", eventId);
-
       return res.status(200).json({
         success: true,
         message: "Webhook already processed",
@@ -116,8 +106,6 @@ export const razorpayWebhookController = async (req, res) => {
     }
 
     if (existingEvent?.status === "ignored") {
-      console.log("⚠️ WEBHOOK ALREADY IGNORED:", eventId);
-
       return res.status(200).json({
         success: true,
         message: "Webhook already ignored",
@@ -176,16 +164,12 @@ export const razorpayWebhookController = async (req, res) => {
         );
       }
 
-      console.log("🔥 FINALIZING PAYMENT");
-
       const result = await finalizePayment({
         paymentIntentId: paymentIntent._id,
         razorpayOrderId: payment.order_id,
         razorpayPaymentId: payment.id,
         fromWebhook: true,
       });
-
-      console.log(result);
 
       await WebhookEvent.updateOne(
         {

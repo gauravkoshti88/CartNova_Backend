@@ -321,7 +321,15 @@ export const getMyOrders = async (userId, { page = 1, limit = 10 } = {}) => {
   };
 
   const [orders, totalOrders] = await Promise.all([
-    Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).lean(),
+    Order.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(perPage)
+      .populate({
+        path: "items.product",
+        select: "basicInfo variants media",
+      })
+      .lean(),
 
     Order.countDocuments(filter),
   ]);

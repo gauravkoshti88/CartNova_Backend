@@ -201,8 +201,6 @@ export const initializeChatSocket = (io) => {
 
   // Socket connection
   io.on("connection", async (socket) => {
-    console.log(`Socket connected → ${socket.userType}:${socket.userId}`);
-
     // Personal room
     const personalRoom = `${socket.userType}:${socket.userId}`;
 
@@ -419,7 +417,6 @@ export const initializeChatSocket = (io) => {
             isRead: false,
             readAt: null,
           });
-          console.log("Chat Socket:", conversation);
 
           // Update conversation
           conversation.lastMessage = message._id;
@@ -643,8 +640,6 @@ export const initializeChatSocket = (io) => {
 
     // Disconnect
     socket.on("disconnect", () => {
-      console.log(`Socket disconnected → ${socket.userType}:${socket.userId}`);
-
       // Remove rate limiter entry
       messageRateLimit.delete(socket.id);
 

@@ -201,15 +201,6 @@ export const createPaymentIntent = async ({
 
     const pricing = await calculateCartAmount(userId, session);
 
-    console.log("PAYMENT INTENT PRICING:", {
-      subtotal: pricing.subtotal,
-      discount: pricing.discount,
-      shippingCharge: pricing.shippingCharge,
-      tax: pricing.tax,
-      totalAmount: pricing.totalAmount,
-      currency: pricing.currency,
-    });
-
     const expectedTotal =
       pricing.subtotal -
       pricing.discount +

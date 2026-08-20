@@ -282,17 +282,6 @@ export const finalizePayment = async ({
 
     const calculatedTotalPaise = toPaise(calculatedTotal);
 
-    console.log("========== PAYMENT AMOUNT CHECK ==========");
-    console.log("PaymentIntent amount:", paymentIntentAmount);
-    console.log("Current subtotal:", currentSubtotal);
-    console.log("Discount:", discount);
-    console.log("Shipping:", shippingCharge);
-    console.log("Tax:", tax);
-    console.log("Calculated total:", calculatedTotal);
-    console.log("PaymentIntent amount paise:", paymentIntentAmountPaise);
-    console.log("Calculated total paise:", calculatedTotalPaise);
-    console.log("===========================================");
-
     if (paymentIntentAmountPaise !== calculatedTotalPaise) {
       throw new Error(
         `Payment amount does not match order amount: payment=${paymentIntentAmount}, order=${calculatedTotal}`,
