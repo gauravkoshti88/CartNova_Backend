@@ -185,6 +185,8 @@ export const razorpayWebhookController = async (req, res) => {
         fromWebhook: true,
       });
 
+      console.log(result);
+
       await WebhookEvent.updateOne(
         {
           eventId,

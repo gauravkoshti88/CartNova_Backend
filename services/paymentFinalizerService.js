@@ -416,6 +416,10 @@ export const finalizePayment = async ({
 
     paymentIntent.signatureVerified = true;
 
+    if (fromWebhook) {
+      paymentIntent.webhookVerified = true;
+    }
+
     paymentIntent.paymentCaptured = true;
 
     paymentIntent.paidAt = paymentIntent.paidAt || now;
