@@ -46,7 +46,7 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5000",
     credentials: true,
   }),
 );
@@ -128,7 +128,7 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5000",
     credentials: true,
   },
 });
