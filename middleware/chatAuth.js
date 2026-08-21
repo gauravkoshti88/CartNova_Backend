@@ -47,8 +47,6 @@ export const chatAuth = (req, res, next) => {
       message: "Authentication required",
     });
   } catch (error) {
-    console.error("CHAT AUTH ERROR:", error);
-
     return res.status(401).json({
       success: false,
       message: "Chat authentication failed",

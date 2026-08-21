@@ -27,8 +27,6 @@ export const getGuestCart = () => {
 
     return cart;
   } catch (error) {
-    console.error("GET GUEST CART ERROR:", error);
-
     return {
       items: [],
       expiresAt: null,

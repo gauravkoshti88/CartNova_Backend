@@ -466,8 +466,6 @@ export const finalizePayment = async ({
       }
     }
 
-    console.error("FINALIZE PAYMENT ERROR:", error);
-
     throw error;
   } finally {
     await session.endSession();

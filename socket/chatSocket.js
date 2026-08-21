@@ -61,8 +61,6 @@ const authenticateSocket = (socket) => {
 
     return null;
   } catch (error) {
-    console.error("SOCKET AUTH ERROR:", error);
-
     return null;
   }
 };
@@ -285,8 +283,6 @@ export const initializeChatSocket = (io) => {
           conversationId,
         });
       } catch (error) {
-        console.error("JOIN CONVERSATION ERROR:", error);
-
         socket.emit("conversation:error", {
           message: "Failed to join conversation",
         });
@@ -517,8 +513,6 @@ export const initializeChatSocket = (io) => {
             });
           }
         } catch (error) {
-          console.error("SEND MESSAGE SOCKET ERROR:", error);
-
           socket.emit("message:error", {
             message: "Failed to send message",
           });
@@ -633,9 +627,7 @@ export const initializeChatSocket = (io) => {
         io.to(`conversation:${conversationId}`).emit("conversation:updated", {
           conversation: updatedConversation,
         });
-      } catch (error) {
-        console.error("MESSAGE READ SOCKET ERROR:", error);
-      }
+      } catch (error) {}
     });
 
     // Disconnect

@@ -46,8 +46,6 @@ export const getUserConversations = async (req, res) => {
       conversations,
     });
   } catch (error) {
-    console.error("GET USER CONVERSATIONS ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to get user conversations",
@@ -94,8 +92,6 @@ export const getOrCreateConversation = async (req, res) => {
       conversation,
     });
   } catch (error) {
-    console.error("GET OR CREATE CONVERSATION ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to create conversation",
@@ -130,8 +126,6 @@ export const getUserConversation = async (req, res) => {
       conversation,
     });
   } catch (error) {
-    console.error("GET USER CONVERSATION ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to get conversation",
@@ -200,8 +194,6 @@ export const getUserMessages = async (req, res) => {
       hasMore,
     });
   } catch (error) {
-    console.error("GET USER MESSAGES ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to get messages",
@@ -258,8 +250,6 @@ export const markUserMessagesRead = async (req, res) => {
       message: "Messages marked as read",
     });
   } catch (error) {
-    console.error("MARK USER MESSAGES READ ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to mark messages as read",
@@ -290,8 +280,6 @@ export const getAdminConversations = async (req, res) => {
       conversations,
     });
   } catch (error) {
-    console.error("GET ADMIN CONVERSATIONS ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to get admin conversations",
@@ -325,8 +313,6 @@ export const getAdminConversation = async (req, res) => {
       conversation,
     });
   } catch (error) {
-    console.error("GET ADMIN CONVERSATION ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to get conversation",
@@ -391,8 +377,6 @@ export const getAdminMessages = async (req, res) => {
       hasMore,
     });
   } catch (error) {
-    console.error("GET ADMIN MESSAGES ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to get messages",
@@ -435,8 +419,6 @@ export const assignConversation = async (req, res) => {
       conversation,
     });
   } catch (error) {
-    console.error("ASSIGN CONVERSATION ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to assign conversation",
@@ -502,8 +484,6 @@ export const markAdminMessagesRead = async (req, res) => {
       message: "Messages marked as read",
     });
   } catch (error) {
-    console.error("MARK ADMIN MESSAGES READ ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to mark messages as read",
@@ -557,8 +537,6 @@ export const closeConversation = async (req, res) => {
       conversation: updatedConversation,
     });
   } catch (error) {
-    console.error("CLOSE CONVERSATION ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to close conversation",
@@ -601,8 +579,6 @@ export const reopenConversation = async (req, res) => {
       conversation: updatedConversation,
     });
   } catch (error) {
-    console.error("REOPEN CONVERSATION ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to reopen conversation",
@@ -654,8 +630,6 @@ export const unassignConversation = async (req, res) => {
       conversation: updatedConversation,
     });
   } catch (error) {
-    console.error("UNASSIGN CONVERSATION ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to unassign conversation",
@@ -697,8 +671,6 @@ export const deleteConversation = async (req, res) => {
       message: "Conversation deleted successfully",
     });
   } catch (error) {
-    console.error("DELETE CONVERSATION ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to delete conversation",
@@ -740,8 +712,6 @@ export const uploadChatAttachments = async (req, res) => {
       attachments: uploadedFiles,
     });
   } catch (error) {
-    console.error("UPLOAD CHAT ATTACHMENTS ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to upload chat attachments",

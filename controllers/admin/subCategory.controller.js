@@ -131,8 +131,6 @@ export const addSubCategory = async (req, res) => {
       subCategory: createdSubCategory,
     });
   } catch (error) {
-    console.error("ADD SUB CATEGORY ERROR:", error);
-
     // -----------------------------------------
     // DUPLICATE KEY ERROR
     // -----------------------------------------
@@ -180,8 +178,6 @@ export const getAllSubCategory = async (req, res) => {
       allSubCategory,
     });
   } catch (error) {
-    console.error("Error in getAllSubCategory:", error);
-
     return res.status(500).json({
       success: false,
       message: "Error fetching sub-categories",
@@ -254,8 +250,6 @@ export const getSubCategoryBySlug = async (req, res) => {
       productCount,
     });
   } catch (error) {
-    console.error("Get SubCategory By Slug Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Error fetching sub-category",
@@ -383,8 +377,6 @@ export const updateSubCategory = async (req, res) => {
       subCategory: updatedSubCategory,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       message: `Update Sub-Category Error ${error.message}`,
@@ -426,8 +418,6 @@ export const updateSubCategoryStatus = async (req, res) => {
       subCategory,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       error: `Update Sub-Category Status Error ${error.message}`,
@@ -460,8 +450,6 @@ export const deleteSubCategory = async (req, res) => {
       message: "Sub-Category Deleted Successfully",
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       error: `Delete Sub-Category Error ${error.message}`,
@@ -495,8 +483,6 @@ export const undoSubCategory = async (req, res) => {
       subCategory,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       error: `Undo Sub-Category Error ${error.message}`,
@@ -519,8 +505,6 @@ export const getAllDeletedSubCategory = async (req, res) => {
       allSubCategory,
     });
   } catch (error) {
-    console.error("Error in getAllDeletedSubCategory:", error);
-
     return res.status(500).json({
       success: false,
       message: "Error fetching deleted sub-categories",

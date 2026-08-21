@@ -46,8 +46,6 @@ export const getWishlist = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("GET WISHLIST ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to fetch wishlist",
@@ -124,8 +122,6 @@ export const addToWishlist = async (req, res) => {
       wishlist,
     });
   } catch (error) {
-    console.error("ADD WISHLIST ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to add product to wishlist",
@@ -173,8 +169,6 @@ export const removeFromWishlist = async (req, res) => {
       wishlist,
     });
   } catch (error) {
-    console.error("REMOVE WISHLIST ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to remove product from wishlist",
@@ -216,8 +210,6 @@ export const clearWishlist = async (req, res) => {
       wishlist,
     });
   } catch (error) {
-    console.error("CLEAR WISHLIST ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to clear wishlist",
@@ -300,8 +292,6 @@ export const mergeWishlist = async (req, res) => {
       wishlist,
     });
   } catch (error) {
-    console.error("MERGE WISHLIST ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to merge wishlist",

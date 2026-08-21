@@ -34,8 +34,6 @@ export const getAdminOrdersController = async (req, res) => {
       ...result,
     });
   } catch (error) {
-    console.error("GET ADMIN ORDERS ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to fetch orders",
@@ -58,8 +56,6 @@ export const getAdminOrderByIdController = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("GET ADMIN ORDER ERROR:", error);
-
     return res.status(404).json({
       success: false,
       message: error.message || "Order not found",
@@ -92,8 +88,6 @@ export const updateAdminOrderStatusController = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("UPDATE ORDER STATUS ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to update order status",
@@ -123,8 +117,6 @@ export const updateOrderTrackingController = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("UPDATE ORDER TRACKING ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to update tracking",

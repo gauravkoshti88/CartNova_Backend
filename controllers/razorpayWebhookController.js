@@ -47,8 +47,6 @@ export const razorpayWebhookController = async (req, res) => {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
     if (!secret) {
-      console.error("RAZORPAY_WEBHOOK_SECRET is missing");
-
       return res.status(500).json({
         success: false,
         message: "Webhook configuration error",
@@ -67,8 +65,6 @@ export const razorpayWebhookController = async (req, res) => {
     const validSignature = verifyWebhookSignature(rawBody, signature, secret);
 
     if (!validSignature) {
-      console.error("❌ INVALID RAZORPAY WEBHOOK SIGNATURE");
-
       return res.status(400).json({
         success: false,
         message: "Invalid webhook signature",
@@ -291,8 +287,6 @@ export const razorpayWebhookController = async (req, res) => {
       message: "Webhook event ignored",
     });
   } catch (error) {
-    console.error("RAZORPAY WEBHOOK ERROR:", error);
-
     if (webhookEvent) {
       try {
         await WebhookEvent.updateOne(
@@ -306,9 +300,7 @@ export const razorpayWebhookController = async (req, res) => {
             },
           },
         );
-      } catch (updateError) {
-        console.error("WEBHOOK EVENT UPDATE ERROR:", updateError);
-      }
+      } catch (updateError) {}
     }
 
     return res.status(500).json({

@@ -53,8 +53,6 @@ export const createOrderController = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("CREATE COD ORDER ERROR:", error);
-
     if (error?.code === 11000) {
       return res.status(409).json({
         success: false,
@@ -93,8 +91,6 @@ export const getMyOrdersController = async (req, res) => {
       ...result,
     });
   } catch (error) {
-    console.error("GET MY ORDERS ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to fetch orders",
@@ -129,8 +125,6 @@ export const getMyOrderByIdController = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("GET MY ORDER ERROR:", error);
-
     return res.status(404).json({
       success: false,
       message: error.message || "Order not found",
@@ -167,8 +161,6 @@ export const cancelMyOrderController = async (req, res) => {
       order,
     });
   } catch (error) {
-    console.error("CANCEL ORDER ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to cancel order",

@@ -165,8 +165,6 @@ export const getChildCategoriesByCategory = async (req, res) => {
       childCategories,
     });
   } catch (error) {
-    console.error("Get child categories by category error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to fetch child categories",

@@ -299,8 +299,6 @@ export const addToCart = async (req, res) => {
       cart,
     });
   } catch (error) {
-    console.error("ADD TO CART ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to add product to cart",
@@ -465,8 +463,6 @@ export const mergeGuestCart = async (req, res) => {
       cart,
     });
   } catch (error) {
-    console.error("MERGE GUEST CART ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to merge guest cart",
@@ -625,8 +621,6 @@ export const updateCartItem = async (req, res) => {
       cart,
     });
   } catch (error) {
-    console.error("UPDATE CART ITEM ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to update cart",

@@ -132,8 +132,6 @@ export const getAllCustomers = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("GET ALL CUSTOMERS ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to fetch customers.",
@@ -206,8 +204,6 @@ export const getCustomerById = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("GET CUSTOMER BY ID ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to fetch customer.",
@@ -296,8 +292,6 @@ export const updateCustomer = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("UPDATE CUSTOMER ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to update customer.",
@@ -330,8 +324,6 @@ export const deleteCustomer = async (req, res) => {
       message: "Customer deleted successfully.",
     });
   } catch (error) {
-    console.error("DELETE CUSTOMER ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to delete customer.",
@@ -374,8 +366,6 @@ export const blockCustomer = async (req, res) => {
       message: "Customer blocked successfully.",
     });
   } catch (error) {
-    console.error("BLOCK CUSTOMER ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to block customer.",
@@ -417,8 +407,6 @@ export const unblockCustomer = async (req, res) => {
       message: "Customer unblocked successfully.",
     });
   } catch (error) {
-    console.error("UNBLOCK CUSTOMER ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to unblock customer.",

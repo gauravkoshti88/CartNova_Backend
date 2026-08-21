@@ -111,8 +111,6 @@ export const getAllBrand = async (req, res) => {
       brands,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       message: "Error fetching brands",
@@ -185,8 +183,6 @@ export const getBrandBySlug = async (req, res) => {
       productCount,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       error: `Get Brand Error ${error.message}`,
@@ -308,8 +304,6 @@ export const updateBrand = async (req, res) => {
       productBrand,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       error: `Update Brand Error ${error.message}`,
@@ -351,8 +345,6 @@ export const updateBrandStatus = async (req, res) => {
       brand,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       error: `Update Brand Status Error ${error.message}`,
@@ -385,8 +377,6 @@ export const deleteBrand = async (req, res) => {
       message: "Product Brand Deleted Successfully ✅",
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       error: `Delete Brand Error ${error.message}`,
@@ -420,8 +410,6 @@ export const undoDeletedBrand = async (req, res) => {
       brand,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       error: `Undo Brand Error ${error.message}`,
@@ -444,8 +432,6 @@ export const getAllDeletedBrand = async (req, res) => {
       brands,
     });
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
       success: false,
       message: "Error fetching deleted brands",

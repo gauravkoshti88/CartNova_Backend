@@ -300,8 +300,6 @@ export const getProducts = async (req, res) => {
       hasPreviousPage: currentPage > 1,
     });
   } catch (error) {
-    console.error("GET PUBLIC PRODUCTS ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to fetch products",
@@ -826,8 +824,6 @@ export const getProductsWithHighDiscount = async (req, res) => {
       products: formattedProducts,
     });
   } catch (error) {
-    console.error("GET 40%+ DISCOUNT PRODUCTS ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to fetch discounted products",

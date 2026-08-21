@@ -829,8 +829,6 @@ export const updateProduct = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.error("UPDATE PRODUCT ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to update product",

@@ -133,8 +133,6 @@ export const googleLogin = async (req, res) => {
       user: userObj,
     });
   } catch (error) {
-    console.error("GOOGLE LOGIN ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Google authentication failed.",
@@ -614,8 +612,6 @@ export const verifyResetPasswordOtp = async (req, res) => {
       resetToken,
     });
   } catch (error) {
-    console.error("VERIFY RESET PASSWORD OTP ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "OTP verification failed.",
@@ -716,8 +712,6 @@ export const resetPassword = async (req, res) => {
       message: "Password reset successfully.",
     });
   } catch (error) {
-    console.error("RESET PASSWORD ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to reset password.",

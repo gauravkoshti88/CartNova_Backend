@@ -296,8 +296,6 @@ export const createOrder = async ({
       }
     }
 
-    console.error("CREATE COD ORDER SERVICE ERROR:", error);
-
     throw error;
   } finally {
     await session.endSession();
@@ -456,8 +454,6 @@ export const cancelMyOrder = async (userId, orderId, reason = "") => {
     return order;
   } catch (error) {
     await session.abortTransaction();
-
-    console.error("CANCEL ORDER SERVICE ERROR:", error);
 
     throw error;
   } finally {

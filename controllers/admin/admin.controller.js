@@ -769,8 +769,6 @@ export const getAdminDashboard = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("GET ADMIN DASHBOARD ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to fetch dashboard data.",

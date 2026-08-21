@@ -86,8 +86,6 @@ export const createRazorpayOrderController = async (req, res) => {
       paymentIntent: updatedPaymentIntent,
     });
   } catch (error) {
-    console.error("CREATE RAZORPAY ORDER ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to create Razorpay order",
@@ -173,8 +171,6 @@ export const verifyRazorpayPaymentController = async (req, res) => {
       alreadyFinalized: result.alreadyFinalized,
     });
   } catch (error) {
-    console.error("VERIFY RAZORPAY PAYMENT ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Payment verification failed",
@@ -202,8 +198,6 @@ export const createPaymentIntentController = async (req, res) => {
       paymentIntent,
     });
   } catch (error) {
-    console.error("CREATE PAYMENT INTENT ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to create payment intent",
@@ -225,8 +219,6 @@ export const getPaymentIntentController = async (req, res) => {
       paymentIntent,
     });
   } catch (error) {
-    console.error("GET PAYMENT INTENT ERROR:", error);
-
     return res.status(404).json({
       success: false,
       message: error.message || "Payment intent not found",
@@ -252,8 +244,6 @@ export const cancelPaymentIntentController = async (req, res) => {
       paymentIntent,
     });
   } catch (error) {
-    console.error("CANCEL PAYMENT INTENT ERROR:", error);
-
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to cancel payment intent",

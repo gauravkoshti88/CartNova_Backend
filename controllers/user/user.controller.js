@@ -173,8 +173,6 @@ export const updateProfile = async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
-    console.error("UPDATE PROFILE ERROR:", error);
-
     // ========================================================
     // DUPLICATE EMAIL / PHONE
     // ========================================================
