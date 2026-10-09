@@ -138,6 +138,15 @@ export const updateGeneral = async (req, res) => {
 
     await website.save();
 
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: "General settings updated successfully.",
@@ -206,6 +215,15 @@ export const createHeroBanner = async (req, res) => {
 
     await website.save();
 
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
+
     return res.status(201).json({
       success: true,
       message: "Hero banner created successfully.",
@@ -272,6 +290,15 @@ export const updateHeroBanner = async (req, res) => {
 
     await website.save();
 
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: "Hero banner updated successfully.",
@@ -316,6 +343,15 @@ export const deleteHeroBanner = async (req, res) => {
     website.heroBanners.pull(bannerId);
 
     await website.save();
+
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -400,7 +436,14 @@ export const reorderHeroBanners = async (req, res) => {
     website.heroBanners.sort((a, b) => a.order - b.order);
 
     await website.save();
-
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
     return res.status(200).json({
       success: true,
       message: "Hero banners reordered successfully.",
@@ -463,6 +506,15 @@ export const createOfferBanner = async (req, res) => {
     });
 
     await website.save();
+
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
 
     return res.status(201).json({
       success: true,
@@ -531,6 +583,15 @@ export const updateOfferBanner = async (req, res) => {
 
     await website.save();
 
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: "Offer banner updated successfully.",
@@ -575,7 +636,14 @@ export const deleteOfferBanner = async (req, res) => {
     website.offerBanners.pull(bannerId);
 
     await website.save();
-
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
     return res.status(200).json({
       success: true,
       message: "Offer banner deleted successfully.",
@@ -615,11 +683,14 @@ export const toggleOfferBanner = async (req, res) => {
 
     await website.save();
 
-    return res.status(200).json({
-      success: true,
-      message: `Offer banner ${banner.isActive ? "activated" : "deactivated"} successfully.`,
-      website,
-    });
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -717,6 +788,14 @@ export const updateAbout = async (req, res) => {
     }
 
     await website.save();
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -766,6 +845,15 @@ export const updateContact = async (req, res) => {
 
     await website.save();
 
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: "Contact information updated successfully.",
@@ -814,6 +902,15 @@ export const updateSocial = async (req, res) => {
 
     await website.save();
 
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: "Social links updated successfully.",
@@ -849,6 +946,15 @@ export const updateFooter = async (req, res) => {
     }
 
     await website.save();
+
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -896,7 +1002,14 @@ export const updateSeo = async (req, res) => {
     }
 
     await website.save();
-
+    if (redis.status === "ready") {
+      try {
+        await redis.del(WEBSITE_CACHE_KEY);
+        console.log("Website cache invalidated successfully");
+      } catch (error) {
+        console.error("Website cache invalidation error:", error.message);
+      }
+    }
     return res.status(200).json({
       success: true,
       message: "SEO settings updated successfully.",

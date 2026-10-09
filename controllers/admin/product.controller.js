@@ -442,6 +442,14 @@ export const addNewProduct = async (req, res) => {
       returnPolicy,
     });
 
+    if (redis.status === "ready") {
+      try {
+        await redis.del(PRODUCT_CACHE_KEY);
+      } catch (error) {
+        console.error("Product cache invalidation error:", error.message);
+      }
+    }
+
     // =========================================================
     // RESPONSE
     // =========================================================
@@ -866,6 +874,14 @@ export const updateProduct = async (req, res) => {
 
     await product.save();
 
+    if (redis.status === "ready") {
+      try {
+        await redis.del(PRODUCT_CACHE_KEY);
+      } catch (error) {
+        console.error("Product cache invalidation error:", error.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: "Product updated successfully",
@@ -919,6 +935,14 @@ export const updateProductStatus = async (req, res) => {
     }
 
     await product.save();
+
+    if (redis.status === "ready") {
+      try {
+        await redis.del(PRODUCT_CACHE_KEY);
+      } catch (error) {
+        console.error("Product cache invalidation error:", error.message);
+      }
+    }
 
     return res.status(200).json({
       success: true,
