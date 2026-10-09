@@ -6,6 +6,10 @@ import Category from "../../models/categorySchema.js";
 import SubCategory from "../../models/subCategorySchema.js";
 import ChildCategory from "../../models/childCategorySchema.js";
 import ProductBrand from "../../models/brandSchema.js";
+import redis from "../../config/redis.js";
+
+const PRODUCT_CACHE_KEY = "cartnova:products:all";
+const PRODUCT_CACHE_TTL = 300;
 
 const generateSKU = (productName) => {
   const productCode = productName
@@ -458,18 +462,51 @@ export const addNewProduct = async (req, res) => {
 
 export const getAllProduct = async (req, res) => {
   try {
+    // Check Redis cache
+    try {
+      const cachedProducts = await redis.get(PRODUCT_CACHE_KEY);
+
+      if (cachedProducts) {
+        return res.status(200).json({
+          success: true,
+          message: "Get All Products Successfully",
+          products: JSON.parse(cachedProducts),
+          cached: true,
+        });
+      }
+    } catch (redisError) {
+      console.error("Product Redis cache read error:", redisError.message);
+    }
+
+    // Fetch products from MongoDB
     const products = await Product.find()
       .populate("basicInfo.brand")
       .populate("basicInfo.category")
       .populate("basicInfo.subCategory")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Store products in Redis for 5 minutes
+    try {
+      await redis.set(
+        PRODUCT_CACHE_KEY,
+        JSON.stringify(products),
+        "EX",
+        PRODUCT_CACHE_TTL,
+      );
+    } catch (redisError) {
+      console.error("Product Redis cache write error:", redisError.message);
+    }
 
     return res.status(200).json({
       success: true,
       message: "Get All Products Successfully",
       products,
+      cached: false,
     });
   } catch (error) {
+    console.error("Get All Product Error:", error.message);
+
     return res.status(500).json({
       success: false,
       error: `Get all product error ${error.message}`,

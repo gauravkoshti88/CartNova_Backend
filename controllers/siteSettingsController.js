@@ -5,27 +5,66 @@ import {
   uploadToCloudinary,
 } from "../utils/cloudinaryFunc.js";
 
+import redis from "../config/redis.js";
+
+const WEBSITE_CACHE_KEY = "website:settings";
+const WEBSITE_CACHE_TTL = 300;
+
 export const getWebsite = async (req, res) => {
   try {
-    let website = await WebSite.findOne();
+    let website = null;
+
+    // Try Redis cache first
+    try {
+      const cachedWebsite = await redis.get(WEBSITE_CACHE_KEY);
+
+      if (cachedWebsite) {
+        return res.status(200).json({
+          success: true,
+          website: JSON.parse(cachedWebsite),
+          cached: true,
+        });
+      }
+    } catch (redisError) {
+      console.error("Website Redis cache read error:", redisError.message);
+    }
+
+    // Fetch from MongoDB if cache is missing
+    website = await WebSite.findOne().lean();
 
     if (!website) {
       website = await WebSite.create({
         general: {
-          websiteName: "G-Shop",
+          websiteName: "CartNova",
         },
       });
+
+      website = website.toObject();
+    }
+
+    // Save website settings in Redis
+    try {
+      await redis.set(
+        WEBSITE_CACHE_KEY,
+        JSON.stringify(website),
+        "EX",
+        WEBSITE_CACHE_TTL,
+      );
+    } catch (redisError) {
+      console.error("Website Redis cache write error:", redisError.message);
     }
 
     return res.status(200).json({
       success: true,
       website,
+      cached: false,
     });
   } catch (error) {
+    console.error("Get Website Error:", error.message);
+
     return res.status(500).json({
       success: false,
       message: "Failed to fetch website settings.",
-      error: error.message,
     });
   }
 };
