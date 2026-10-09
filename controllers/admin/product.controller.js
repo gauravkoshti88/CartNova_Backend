@@ -462,20 +462,22 @@ export const addNewProduct = async (req, res) => {
 
 export const getAllProduct = async (req, res) => {
   try {
-    // Check Redis cache
-    try {
-      const cachedProducts = await redis.get(PRODUCT_CACHE_KEY);
+    // Check Redis cache when connection is ready
+    if (redis.status === "ready") {
+      try {
+        const cachedProducts = await redis.get(PRODUCT_CACHE_KEY);
 
-      if (cachedProducts) {
-        return res.status(200).json({
-          success: true,
-          message: "Get All Products Successfully",
-          products: JSON.parse(cachedProducts),
-          cached: true,
-        });
+        if (cachedProducts) {
+          return res.status(200).json({
+            success: true,
+            message: "Get All Products Successfully",
+            products: JSON.parse(cachedProducts),
+            cached: true,
+          });
+        }
+      } catch (redisError) {
+        console.error("Product Redis cache read error:", redisError.message);
       }
-    } catch (redisError) {
-      console.error("Product Redis cache read error:", redisError.message);
     }
 
     // Fetch products from MongoDB
@@ -487,15 +489,19 @@ export const getAllProduct = async (req, res) => {
       .lean();
 
     // Store products in Redis for 5 minutes
-    try {
-      await redis.set(
-        PRODUCT_CACHE_KEY,
-        JSON.stringify(products),
-        "EX",
-        PRODUCT_CACHE_TTL,
-      );
-    } catch (redisError) {
-      console.error("Product Redis cache write error:", redisError.message);
+    if (redis.status === "ready") {
+      try {
+        await redis.set(
+          PRODUCT_CACHE_KEY,
+          JSON.stringify(products),
+          "EX",
+          PRODUCT_CACHE_TTL,
+        );
+
+        console.log("Products saved to Redis cache");
+      } catch (redisError) {
+        console.error("Product Redis cache write error:", redisError.message);
+      }
     }
 
     return res.status(200).json({
