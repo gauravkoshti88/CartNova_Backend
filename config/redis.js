@@ -1,4 +1,7 @@
 import Redis from "ioredis";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const redis = new Redis(process.env.REDIS_URL, {
   lazyConnect: true,
@@ -11,6 +14,10 @@ const redis = new Redis(process.env.REDIS_URL, {
 
 redis.on("connect", () => {
   console.log("Redis connected successfully");
+});
+
+redis.on("ready", () => {
+  console.log("Redis is ready");
 });
 
 redis.on("error", (error) => {
